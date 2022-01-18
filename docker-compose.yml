@@ -1,0 +1,61 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    build:
+      context: elasticsearch/
+    volumes:
+      - ./elasticsearch/config/opensearch.yml:/usr/share/elasticsearch/config/opensearch.yml:ro,z
+      - elasticsearch:/usr/share/elasticsearch/data:z
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=elasticsearch
+      # - "DISABLE_SECURITY_PLUGIN=true"
+    networks:
+      - elk
+
+  logstash:
+    build:
+      context: logstash/
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,z
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro,z
+    ports:
+      - "5044:5044"
+      - "5001:5001/tcp"
+      - "5001:5001/udp"
+      - "9600:9600"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    expose:
+      - "5001"
+  kibana:
+    build:
+      context: kibana/
+    volumes:
+      - ./kibana/config/opensearch_dashboards.yml:/usr/share/kibana/config/opensearch_dashboards.yml:ro,z
+    ports:
+      - "5601:5601"
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://elasticsearch:9200"]'
+      # - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  elk:
+    driver: bridge
+
+volumes:
+  elasticsearch: null

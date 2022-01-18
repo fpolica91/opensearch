@@ -1,0 +1,5 @@
+action.auto_create_index: true
+network.host: 0.0.0.0
+cluster.name: freedom-sq-logs
+discovery.type: single-node
+node.name: single
