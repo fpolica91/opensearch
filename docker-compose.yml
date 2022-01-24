@@ -27,15 +27,17 @@ services:
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro,z
     ports:
       - "5044:5044"
-      - "5001:5001/tcp"
-      - "5001:5001/udp"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "8080:8080/tcp"
       - "9600:9600"
     networks:
       - elk
     depends_on:
       - elasticsearch
     expose:
-      - "5001"
+      - "5000"
+      - "8080"
   kibana:
     build:
       context: kibana/
